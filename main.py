@@ -11,12 +11,23 @@ def generate_variation(words, max_length=20):
     """Генерирует случайную вариацию из списка слов"""
     variation = []
     length = 0
-    while length < max_length - 4:  # оставляем место для '_bot'
+    used_words = set()  # множество использованных слов
+    while len(variation) < 2:  # добавляем как минимум 2 слова
         word = random.choice(words)
-        if length + len(word) + len(variation) > max_length - 4:
-            break
-        variation.append(word)
-        length += len(word)
+        if word not in used_words:  # проверяем, что слово не использовалось ранее
+            if length + len(word) + len(variation) > max_length - 4:
+                break
+            variation.append(word)
+            used_words.add(word)
+            length += len(word)
+    while length < max_length - 4:  # добавляем дополнительные слова, если есть место
+        word = random.choice(words)
+        if word not in used_words:  # проверяем, что слово не использовалось ранее
+            if length + len(word) + len(variation) > max_length - 4:
+                break
+            variation.append(word)
+            used_words.add(word)
+            length += len(word)
     return '_'.join(variation) + '_bot'
 
 def save_variations(variations, filename):
@@ -41,8 +52,11 @@ def main():
     variations = set()
     while len(variations) < num_variations:
         variation = generate_variation(words)
-        if variation not in variations:
-            variations.add(variation)
+        if variation not in variations and variation != '_bot':
+            if not variation.startswith('_'):  # проверяем, что вариация не начинается с '_'
+                if len(variation.split('_')) > 2:  # проверяем, что вариация содержит более 1 слова
+                    if '__' not in variation:  # проверяем, что вариация не содержит '__'
+                        variations.add(variation)
 
     print("Сгенерированные вариации:")
     for variation in variations:
